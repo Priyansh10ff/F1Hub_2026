@@ -556,6 +556,8 @@ function HomePage({ navigate, standingsData, scheduleData }) {
         </div>
       </section>
 
+      <DriversGridSection navigate={navigate} />
+
       <Footer navigate={navigate} />
     </div>
   );
@@ -1808,14 +1810,14 @@ export default function F1Hub() {
     const props = { navigate, standingsData, scheduleData };
     if (page === 'team' && teamId) return <TeamDetailPage teamId={teamId} {...props} />;
     switch (page) {
-      case 'home':      return <><HomePage {...props} /><DriversGridSection navigate={navigate} /></>;
+      case 'home':      return <HomePage {...props} />;
       case 'teams':     return <TeamsPage {...props} />;
       case 'drivers':   return <DriversPage {...props} />;
       case 'news':      return <NewsPage {...props} />;
       case 'schedule':  return <SchedulePage {...props} />;
       case 'predictor': return <PredictorPage {...props} />;
       case 'calculator':return <ChampionshipCalcPage {...props} />;
-      default:          return <><HomePage {...props} /><DriversGridSection navigate={navigate} /></>;
+      default:          return <HomePage {...props} />;
     }
   };
 
