@@ -45,6 +45,10 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .nav-link.active::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 100%; height: 2px; background: var(--red); }
 .nav-cta { font-family: var(--font-d); font-weight: 800; font-style: italic; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; background: var(--red); color: #fff; padding: 9px 20px; cursor: pointer; transition: background .2s; border: none; }
 .nav-cta:hover { background: var(--red2); }
+.nav-mobile-toggle { display: none; width: 40px; height: 36px; align-items: center; justify-content: center; flex-direction: column; gap: 5px; border: 1px solid var(--gray4); background: var(--surface); }
+.nav-mobile-toggle span { width: 18px; height: 2px; background: var(--white); display: block; }
+.nav-mobile-backdrop { display: none; }
+.nav-mobile-menu { display: none; }
 
 /* ANIMATIONS */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -708,3 +712,210 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .calc-filter-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
 .calc-filter-btn:hover:not(.active) { border-color: var(--gray2); color: var(--gray1); }
+
+/* SPONSOR BAR SHELL */
+.sponsors-shell { position: relative; }
+.sponsors-left-badge {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 100px; background: var(--red);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2; flex-shrink: 0;
+}
+.sponsors-left-logo {
+  font-family: var(--font-d); font-weight: 900; font-style: italic;
+  font-size: 22px; color: #fff; letter-spacing: -1px;
+}
+.sponsors-right-badge {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 80px; background: var(--surface2); border-left: 1px solid var(--gray4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2; flex-shrink: 0;
+}
+.sponsors-right-logo {
+  font-family: var(--font-d); font-weight: 900; font-size: 14px;
+  letter-spacing: 2px; color: var(--gray2);
+}
+.sponsors-track-wrap { overflow: hidden; width: 100%; padding: 0 100px; }
+
+@media (max-width: 1200px) {
+  .calc-grid { grid-template-columns: 320px 1fr; }
+}
+
+@media (max-width: 1024px) {
+  .nav { padding: 12px 24px; }
+  .nav-links { gap: 20px; }
+  .nav-link { letter-spacing: 2px; font-size: 12px; }
+
+  .hero-content, .podium-wrap, .team-hero-content { padding-left: 32px; padding-right: 32px; }
+  .section, .drivers-grid-section, .eng-section { padding-left: 32px; padding-right: 32px; }
+  .drivers-page, .news-page, .schedule-page, .predictor-page, .calc-page { padding: 92px 32px 56px; }
+  .next-race-banner { margin: 0 32px 48px; }
+  .sep { margin: 0 32px; }
+  .footer { padding: 42px 32px 24px; }
+
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .drivers-grid { grid-template-columns: repeat(2, 1fr); }
+  .calc-grid { grid-template-columns: 1fr; }
+  .calc-empty, .calc-loading { padding: 32px 20px; }
+
+  .standings-row { flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+  .standings-driver-name { min-width: 160px; }
+  .standings-team-name { width: auto; min-width: 88px; }
+  .standings-pts-bar { min-width: 160px; flex: 1 1 100%; }
+
+  .race-row { flex-wrap: wrap; gap: 8px 14px; padding: 16px 0; }
+  .race-row.next::before { position: static; transform: none; display: inline-block; margin-left: auto; }
+  .race-name { width: 100%; font-size: 19px; }
+  .race-circuit { flex: 1 1 48%; }
+  .race-date, .race-winner { width: auto; }
+
+  .constructor-row { flex-wrap: wrap; }
+  .constructor-name { min-width: 0; width: 100%; }
+  .constructor-bar-wrap { width: calc(100% - 64px); flex: 0 0 auto; }
+}
+
+@media (max-width: 768px) {
+  .nav { padding: 12px 16px; }
+  .nav-links { display: none; }
+  .nav-cta { display: none; }
+  .nav-mobile-toggle { display: inline-flex; }
+  .ticker-item { padding: 0 20px; letter-spacing: 1px; }
+  .nav-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 28px 0 0 0;
+    z-index: 997;
+    background: rgba(0,0,0,.55);
+  }
+  .nav-mobile-menu {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: 82px;
+    z-index: 998;
+    background: var(--surface);
+    border: 1px solid var(--gray4);
+    box-shadow: 0 20px 40px rgba(0,0,0,.45);
+    transform: translateY(-8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .nav-mobile-menu.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-mobile-link {
+    text-align: left;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--gray4);
+    font-family: var(--font-d);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gray2);
+  }
+  .nav-mobile-link.active { color: var(--white); background: rgba(232,0,45,.12); }
+  .nav-mobile-oracle {
+    margin: 10px;
+    padding: 12px 14px;
+    font-family: var(--font-d);
+    font-weight: 900;
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--red);
+  }
+
+  .hero { min-height: 92vh; padding-bottom: 42px; }
+  .hero-content, .podium-wrap { padding: 0 16px; }
+  .podium-wrap { flex-direction: column; margin-top: 28px; }
+  .session-data { display: none; }
+
+  .section { padding: 44px 16px; }
+  .section-header-flex { flex-direction: column; gap: 12px; }
+  .section-desc { max-width: 100%; }
+  .drivers-grid-section { padding: 44px 16px; }
+  .drivers-scroll-wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 24px; }
+
+  .grid-4, .grid-3, .grid-2, .news-grid, .spec-grid, .reg-section, .predictor-grid { grid-template-columns: 1fr; }
+  .driver-section { grid-template-columns: 1fr; padding: 40px 16px; gap: 28px; }
+  .driver-stats, .spec-stats { flex-wrap: wrap; gap: 16px; }
+  .eng-grid { grid-template-columns: 1fr; }
+  .drivers-grid { grid-template-columns: 1fr; }
+
+  .drivers-page, .news-page, .schedule-page, .predictor-page, .calc-page { padding: 84px 16px 36px; }
+  .team-hero-content { padding: 26px 16px; }
+  .team-hero-chassis { right: 16px; bottom: 20px; padding-left: 12px; }
+  .team-hero-chassis-id { font-size: 22px; }
+  .team-hero { min-height: 72vh; }
+  .eng-section { padding: 40px 16px; }
+  .next-race-banner { margin: 0 16px 36px; flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
+  .nrb-sep { display: none; }
+  .footer { padding: 36px 16px 16px; }
+  .footer-top, .footer-bottom { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .factors-grid, .calc-summary { grid-template-columns: 1fr; }
+
+  .predictor-panel, .calc-panel, .calc-results { padding: 18px; }
+  .predictor-driver { font-size: 14px; }
+  .predictor-pct { width: auto; min-width: 52px; }
+
+  .race-round { width: auto; }
+  .race-flag { width: auto; font-size: 20px; }
+  .race-circuit { width: 100%; flex: 1 1 100%; }
+  .race-status { margin-left: auto; }
+  .race-winner { font-size: 12px; }
+
+  .standings-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .standings-table th, .standings-table td { padding: 12px 10px; }
+  .constructor-name { font-size: 16px; }
+  .constructor-pts { width: auto; min-width: 48px; }
+
+  .calc-scenario { grid-template-columns: 24px 1fr; gap: 8px; }
+  .calc-scenario-pts { grid-column: 1 / -1; font-size: 12px; padding-left: 32px; white-space: normal; }
+  .calc-scenario-rank { font-size: 16px; }
+  .calc-run-btn { font-size: 14px; letter-spacing: 2px; }
+
+  .sponsors-left-badge { width: 72px; }
+  .sponsors-left-logo { font-size: 18px; }
+  .sponsors-right-badge { width: 56px; }
+  .sponsors-right-logo { font-size: 11px; letter-spacing: 1px; }
+  .sponsors-track-wrap { padding: 0 72px; }
+  .sponsor-item { padding: 14px 24px; font-size: 12px; letter-spacing: 2px; }
+}
+
+@media (max-width: 480px) {
+  .nav-logo { font-size: 18px; letter-spacing: .5px; }
+  .nav-cta { font-size: 10px; padding: 7px 10px; }
+  .hero-label, .section-label { letter-spacing: 3px; }
+  .hero-title .line1, .hero-title .line2 { font-size: clamp(44px, 13vw, 64px); }
+  .podium-card { padding: 16px 14px; }
+  .podium-name { font-size: 22px; }
+  .section-title { font-size: clamp(30px, 11vw, 44px); }
+
+  .standings-row { padding: 10px 0; gap: 8px; }
+  .standings-driver-name { font-size: 16px; min-width: 0; }
+  .standings-team-name, .standings-pts { font-size: 10px; }
+
+  .race-name { font-size: 16px; }
+  .race-date, .race-status, .race-circuit { font-size: 10px; letter-spacing: 1px; }
+  .drivers-scroll-wrap { grid-template-columns: 1fr; }
+  .driver-card, .team-card-body { padding: 16px; }
+
+  .calc-summary-val { font-size: 30px; }
+  .calc-filter-btn { letter-spacing: 1px; padding: 8px 10px; font-size: 10px; }
+  .calc-empty { padding: 36px 12px; font-size: 12px; letter-spacing: 2px; }
+
+  .sponsors-left-badge { width: 56px; }
+  .sponsors-left-logo { font-size: 15px; }
+  .sponsors-right-badge { width: 44px; }
+  .sponsors-right-logo { font-size: 9px; letter-spacing: .5px; }
+  .sponsors-track-wrap { padding: 0 56px; }
+  .sponsor-item { padding: 12px 16px; font-size: 10px; letter-spacing: 1px; }
+}

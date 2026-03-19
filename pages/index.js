@@ -304,21 +304,45 @@ function Ticker({ standings }) {
 
 /* ─── NAVBAR ─────────────────────────────────────────────── */
 function Navbar({ page, navigate, hidden }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const links = [
     { id: 'home', label: 'HOME' }, { id: 'teams', label: 'TEAMS' },
     { id: 'schedule', label: 'SCHEDULE' }, { id: 'drivers', label: 'DRIVERS' },
     { id: 'news', label: 'NEWS' }, { id: 'calculator', label: 'CALC' },
   ];
+  const goTo = (id) => {
+    setMobileOpen(false);
+    navigate(id);
+  };
+
+  useEffect(() => { setMobileOpen(false); }, [page, hidden]);
+
   return (
-    <nav className={`nav ${hidden ? 'nav-hidden' : ''}`}>
-      <div className="nav-logo" onClick={() => navigate('home')}>F1 HUB 2026</div>
-      <div className="nav-links">
+    <>
+      <nav className={`nav ${hidden ? 'nav-hidden' : ''}`}>
+        <div className="nav-logo" onClick={() => goTo('home')}>F1 HUB 2026</div>
+        <div className="nav-links">
+          {links.map(l => (
+            <span key={l.id} className={`nav-link ${page === l.id ? 'active' : ''}`} onClick={() => goTo(l.id)}>{l.label}</span>
+          ))}
+        </div>
+        <button className="nav-mobile-toggle" aria-label="Toggle mobile menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen(v => !v)}>
+          <span />
+          <span />
+          <span />
+        </button>
+        <button className="nav-cta" onClick={() => goTo('predictor')}>⚡ RACE ORACLE</button>
+      </nav>
+      {mobileOpen && <button className="nav-mobile-backdrop" aria-label="Close mobile menu" onClick={() => setMobileOpen(false)} />}
+      <div className={`nav-mobile-menu${mobileOpen ? ' open' : ''}`}>
         {links.map(l => (
-          <span key={l.id} className={`nav-link ${page === l.id ? 'active' : ''}`} onClick={() => navigate(l.id)}>{l.label}</span>
+          <button key={l.id} className={`nav-mobile-link ${page === l.id ? 'active' : ''}`} onClick={() => goTo(l.id)}>
+            {l.label}
+          </button>
         ))}
+        <button className="nav-mobile-oracle" onClick={() => goTo('predictor')}>⚡ RACE ORACLE</button>
       </div>
-      <button className="nav-cta" onClick={() => navigate('predictor')}>⚡ RACE ORACLE</button>
-    </nav>
+    </>
   );
 }
 
@@ -1452,16 +1476,16 @@ function SponsorsBar() {
   ];
   const doubled = [...sponsors, ...sponsors];
   return (
-    <div className="sponsors-bar" style={{ position: 'relative' }}>
+    <div className="sponsors-bar sponsors-shell">
       {/* F1 logo left */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 100, background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, flexShrink: 0 }}>
-        <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontStyle: 'italic', fontSize: 22, color: '#fff', letterSpacing: -1 }}>F<span style={{ color: 'rgba(255,255,255,.75)' }}>1</span></span>
+      <div className="sponsors-left-badge">
+        <span className="sponsors-left-logo">F<span style={{ color: 'rgba(255,255,255,.75)' }}>1</span></span>
       </div>
       {/* FIA badge right */}
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'var(--surface2)', borderLeft: '1px solid var(--gray4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, flexShrink: 0 }}>
-        <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 14, letterSpacing: 2, color: 'var(--gray2)' }}>FIA</span>
+      <div className="sponsors-right-badge">
+        <span className="sponsors-right-logo">FIA</span>
       </div>
-      <div style={{ overflow: 'hidden', width: '100%', padding: '0 100px 0 100px' }}>
+      <div className="sponsors-track-wrap">
         <div className="sponsors-scroll">
           {doubled.map((s, i) => (
             <span key={i} className={`sponsor-item${s.highlight ? ' highlighted' : ''}`}>{s.name}</span>
