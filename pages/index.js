@@ -52,9 +52,9 @@ const DRIVER_PHOTOS = {
 
   'Max Verstappen': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/redbullracing/maxver01/2026redbullracingmaxver01right.webp',
 
-  'Isack Hadjar': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/racingbulls/isahad01/2026racingbullsisahad01right.webp',
+  'Isack Hadjar': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/v1740000001/common/f1/2026/redbullracing/isahad01/2026redbullracingisahad01right.webp',
 
-  'Liam Lawson': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/redbullracing/lialaw01/2026redbullracinglialaw01right.webp',
+  'Liam Lawson': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/v1740000001/common/f1/2026/racingbulls/lialaw01/2026racingbullslialaw01right.webp',
 
   'Arvid Lindblad': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/racingbulls/arvlin01/2026racingbullsarvlin01right.webp',
 

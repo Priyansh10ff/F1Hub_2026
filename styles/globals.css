@@ -172,7 +172,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .driver-stat-lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray3); font-family: var(--font-d); }
 .driver-num-badge { position: absolute; right: 0; bottom: 0; font-family: var(--font-d); font-weight: 900; font-style: italic; font-size: 80px; padding: 10px 20px; line-height: 1; }
 .driver-portrait { position: relative; aspect-ratio: 3/4; overflow: hidden; background: var(--surface2); }
-.driver-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 16%; filter: grayscale(.4) brightness(.8); }
+.driver-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 4% !important; filter: brightness(1.02) saturate(1.02) !important; }
 
 /* BUTTONS */
 .btn-outline { font-family: var(--font-d); font-weight: 800; font-style: italic; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; border: 2px solid rgba(255,255,255,.3); color: var(--white); padding: 14px 30px; background: transparent; cursor: pointer; transition: all .2s; }
@@ -502,8 +502,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .driver-grid-card:hover .dgc-img { transform: scale(1.05); filter: brightness(.95) saturate(1.1); }
 .dgc-img {
   width: 100%; height: 100%;
-  object-fit: cover; object-position: center 18%;
-  filter: brightness(.78) saturate(.85);
+  object-fit: cover; object-position: center 6%;
+  filter: brightness(.95) saturate(.95);
   transition: transform 0.4s ease, filter 0.4s ease;
 }
 .dgc-team-bar {
