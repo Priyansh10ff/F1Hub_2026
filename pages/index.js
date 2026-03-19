@@ -1,6 +1,6 @@
 // pages/index.js — F1 HUB 2026 · 100% VERIFIED REAL DATA as of Round 2 (Chinese GP, Mar 15 2026)
 import Head from 'next/head';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import {
   calculateRaceWinProbability,
@@ -15,8 +15,8 @@ const TC = {
   mercedes:    { primary: '#00D2BE', dark: '#001f1c' },
   ferrari:     { primary: '#DC0000', dark: '#200000' },
   mclaren:     { primary: '#FF8000', dark: '#251200' },
-  redbull:     { primary: '#3671C6', dark: '#0a1830' },
-  racingbulls: { primary: '#6692FF', dark: '#080f2a' },
+  redbull:     { primary: '#1B3FAB', dark: '#05091e' },
+  racingbulls: { primary: '#5377FF', dark: '#050b28' },
   haas:        { primary: '#E8002D', dark: '#180008' },
   alpine:      { primary: '#FF87BC', dark: '#1a0010' },
   audi:        { primary: '#BB0000', dark: '#1a0000' },
@@ -26,45 +26,45 @@ const TC = {
 };
 const getColor = (id) => TC[id] || { primary: '#888', dark: '#111' };
 
-/* ─── DRIVER PHOTOS ── media.formula1.com Cloudinary CDN ── */
+/* ─── DRIVER PHOTOS ── Official F1 CDN with built-in fallback ── */
 const DRIVER_PHOTOS = {
-  'George Russell':    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01',
-  'Kimi Antonelli':    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/A/ANDANT01_Kimi_Antonelli/andant01',
-  'Lewis Hamilton':    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01',
-  'Charles Leclerc':   'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01',
-  'Lando Norris':      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01',
-  'Oscar Piastri':     'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01',
-  'Max Verstappen':    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01',
-  'Isack Hadjar':      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/I/ISAHAD01_Isack_Hadjar/isahad01',
-  'Liam Lawson':       'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/L/LIALAW01_Liam_Lawson/lialaw01',
-  'Arvid Lindblad':    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/A/ARVLIN01_Arvid_Lindblad/arvlin01',
-  'Oliver Bearman':    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/O/OLIBEA01_Oliver_Bearman/olibea01',
-  'Esteban Ocon':      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/E/ESTOCO01_Esteban_Ocon/estoco01',
-  'Pierre Gasly':      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/P/PIEGAS01_Pierre_Gasly/piegas01',
-  'Franco Colapinto':  'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/F/FRACOL01_Franco_Colapinto/fracol01',
-  'Nico Hülkenberg':   'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/N/NICHUL01_Nico_Hulkenberg/nichul01',
-  'Gabriel Bortoleto': 'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/G/GABBOR01_Gabriel_Bortoleto/gabbor01',
-  'Carlos Sainz':      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01',
-  'Alexander Albon':   'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/A/ALEALB01_Alexander_Albon/alealb01',
-  'Fernando Alonso':   'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/F/FERALO01_Fernando_Alonso/feralo01',
-  'Lance Stroll':      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/L/LANSTR01_Lance_Stroll/lanstr01',
-  'Valtteri Bottas':   'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/V/VALBOT01_Valtteri_Bottas/valbot01',
-  'Sergio Pérez':      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/drivers/S/SERPER01_Sergio_Perez/serper01',
+  'George Russell':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mercedes/georus01/2026mercedesgeorus01right.webp',
+  'Kimi Antonelli':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mercedes/andant01/2026mercedesandant01right.webp',
+  'Lewis Hamilton':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/ferrari/lewham01/2026ferrarilewham01right.webp',
+  'Charles Leclerc':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/ferrari/chalec01/2026ferrarichalec01right.webp',
+  'Lando Norris':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mclaren/lannor01/2026mclarenlannor01right.webp',
+  'Oscar Piastri':     'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mclaren/oscpia01/2026mclarenoscpia01right.webp',
+  'Max Verstappen':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/red-bull-racing/maxver01/2026redbullracingmaxver01right.webp',
+  'Isack Hadjar':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/red-bull-racing/isahad01/2026redbullracingisahad01right.webp',
+  'Liam Lawson':       'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/racing-bulls/lialaw01/2026racingbullslialaw01right.webp',
+  'Arvid Lindblad':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/racing-bulls/arvlin01/2026racingbullsarvlin01right.webp',
+  'Oliver Bearman':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/haas/olibea01/2026haasolibea01right.webp',
+  'Esteban Ocon':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/haas/estoco01/2026haasestoco01right.webp',
+  'Pierre Gasly':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/alpine/piegas01/2026alpinepiegas01right.webp',
+  'Franco Colapinto':  'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/alpine/fracol01/2026alpinefracol01right.webp',
+  'Nico Hülkenberg':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/audi/nichul01/2026audinichul01right.webp',
+  'Gabriel Bortoleto': 'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/audi/gabbor01/2026audigabbor01right.webp',
+  'Carlos Sainz':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/williams/carsai01/2026williamscarsai01right.webp',
+  'Alexander Albon':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/williams/alealb01/2026williamsalealb01right.webp',
+  'Fernando Alonso':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/aston-martin/feralo01/2026astonmartinferalo01right.webp',
+  'Lance Stroll':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/aston-martin/lanstr01/2026astonmartinlanstr01right.webp',
+  'Valtteri Bottas':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/cadillac/valbot01/2026cadillacvalbot01right.webp',
+  'Sergio Pérez':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/cadillac/serper01/2026cadillacserper01right.webp',
 };
 
-/* ─── 2026 CAR IMAGES ── formula1.com Cloudinary CDN ── */
+/* ─── 2026 CAR IMAGES ── Official F1 CDN with fallback ── */
 const CAR_IMAGES = {
-  mercedes:    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/mercedes',
-  ferrari:     'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/ferrari',
-  mclaren:     'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/mclaren',
-  redbull:     'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/red-bull-racing',
-  racingbulls: 'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/rb',
-  haas:        'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/haas',
-  alpine:      'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/alpine',
-  audi:        'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/kick-sauber',
-  williams:    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/williams',
-  cadillac:    'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/haas',
-  astonmartin: 'https://media.formula1.com/image/upload/f_auto,c_limit,q_auto,w_1320/content/dam/fom-website/teams/2025/aston-martin',
+  mercedes:    'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/mercedes.png',
+  ferrari:     'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/ferrari.png',
+  mclaren:     'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/mclaren.png',
+  redbull:     'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/red-bull-racing.png',
+  racingbulls: 'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/rb.png',
+  haas:        'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/haas.png',
+  alpine:      'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/alpine.png',
+  audi:        'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/audi.png',
+  williams:    'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/williams.png',
+  cadillac:    'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/cadillac.png',
+  astonmartin: 'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/aston-martin.png',
 };
 
 /* ─── REAL 2026 STANDINGS (after Round 2 — Chinese GP, Mar 15 2026) ── */
@@ -267,7 +267,7 @@ function Navbar({ page, navigate }) {
   const links = [
     { id: 'home', label: 'HOME' }, { id: 'teams', label: 'TEAMS' },
     { id: 'schedule', label: 'SCHEDULE' }, { id: 'drivers', label: 'DRIVERS' },
-    { id: 'news', label: 'NEWS' },
+    { id: 'news', label: 'NEWS' }, { id: 'calculator', label: 'CALC' },
   ];
   return (
     <nav className="nav">
@@ -332,8 +332,50 @@ function HomePage({ navigate, standingsData, scheduleData }) {
   return (
     <div className="page">
       <section className="hero">
-        <img className="hero-bg" src="https://images.unsplash.com/photo-1612036782180-6f0822e90e4e?w=1600&q=80" alt="F1 2026" loading="eager" onError={e => e.target.style.display='none'} />
-        <div className="hero-overlay" />
+        {/* Multi-driver collage background */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+          {/* Base track atmosphere image */}
+          <img
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.28) saturate(.6)', zIndex: 0 }}
+            src="https://images.unsplash.com/photo-1537808288253-200047a98c1b?w=1800&q=90"
+            alt="" onError={e => e.target.style.display='none'}
+          />
+          {/* Driver photo strip — right side */}
+          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '58%', display: 'flex', zIndex: 1 }}>
+            {[
+              { name: 'George Russell',  teamId: 'mercedes' },
+              { name: 'Kimi Antonelli',  teamId: 'mercedes' },
+              { name: 'Charles Leclerc', teamId: 'ferrari' },
+              { name: 'Lewis Hamilton',  teamId: 'ferrari' },
+              { name: 'Lando Norris',    teamId: 'mclaren' },
+              { name: 'Max Verstappen',  teamId: 'redbull' },
+            ].map((d, i) => {
+              const tc = getColor(d.teamId);
+              const photo = DRIVER_PHOTOS[d.name];
+              return (
+                <div key={d.name} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                  {photo && <img src={photo} alt={d.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', filter: 'brightness(.55) saturate(.7)' }} onError={e => e.target.style.display='none'} />}
+                  {/* team colour sliver at bottom */}
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: tc.primary }} />
+                </div>
+              );
+            })}
+            {/* left-to-right fade so drivers blend into text */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(8,8,8,1) 0%, rgba(8,8,8,.7) 18%, rgba(8,8,8,.2) 55%, rgba(8,8,8,.55) 100%)', zIndex: 2 }} />
+            {/* bottom fade */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to top, rgba(8,8,8,.95) 0%, transparent 100%)', zIndex: 3 }} />
+          </div>
+          {/* F1 logo watermark — enormous behind drivers */}
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 0, fontFamily: 'var(--font-d)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(200px,32vw,480px)', color: 'rgba(255,255,255,.028)', letterSpacing: -20, lineHeight: 1, pointerEvents: 'none', userSelect: 'none', whiteSpace: 'nowrap' }}>
+            F<span style={{ color: 'rgba(232,0,45,.045)' }}>1</span>
+          </div>
+          {/* 2026 watermark */}
+          <div style={{ position: 'absolute', right: '3%', bottom: '8%', zIndex: 4, fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(40px,7vw,100px)', color: 'rgba(255,255,255,.035)', letterSpacing: 8, pointerEvents: 'none', userSelect: 'none' }}>
+            2026
+          </div>
+        </div>
+        {/* dark left overlay for text legibility */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(8,8,8,.98) 0%, rgba(8,8,8,.82) 38%, transparent 65%)', zIndex: 1 }} />
         <div className="hero-content">
           <div className="hero-label au">WORLD CHAMPIONSHIP STANDINGS — ROUND 2 OF 22 · 2026 SEASON</div>
           <h1 className="hero-title">
@@ -1016,10 +1058,702 @@ function PredictorPage({ navigate, standingsData, scheduleData }) {
   );
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   F1 RACE-START INTRO SCREEN
+═══════════════════════════════════════════════════════════ */
+function IntroScreen({ onDone }) {
+  const [phase, setPhase] = useState('idle');
+  const [litCount, setLitCount] = useState(0);
+  const [lightColor, setLightColor] = useState('off'); // off | red | yellow | green
+  const [statusText, setStatusText] = useState('');
+  const [wipeRed, setWipeRed] = useState(false);
+  const [wipeDark, setWipeDark] = useState(false);
+  const [fading, setFading] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    const seq = (ms) => new Promise(r => setTimeout(r, ms));
+    (async () => {
+      await seq(200);
+      setShowContent(true);
+      setStatusText('2026 FIA FORMULA ONE WORLD CHAMPIONSHIP');
+      await seq(1000);
+      setPhase('lights');
+      setStatusText('RACE START SEQUENCE INITIATED');
+
+      // RED lights — one by one
+      for (let n = 1; n <= 5; n++) {
+        await seq(540);
+        setLightColor('red');
+        setLitCount(n);
+        setStatusText(`LIGHT ${n}`);
+      }
+      await seq(1200); // tension hold
+
+      // YELLOW flash
+      setLightColor('yellow');
+      setStatusText('STANDBY');
+      await seq(650);
+
+      // GREEN — all lit green
+      setLightColor('green');
+      setStatusText('');
+      await seq(280);
+
+      // LIGHTS OUT
+      setLitCount(0);
+      setLightColor('off');
+      setPhase('go');
+
+      await seq(100);
+      setWipeRed(true);
+      await seq(360);
+      setWipeDark(true);
+      await seq(500);
+      setFading(true);
+      await seq(300);
+      onDone();
+    })();
+  }, []);
+
+  const getLightGlow = (n) => {
+    const lit = litCount >= n;
+    if (!lit) return {
+      bg: 'radial-gradient(circle at 50% 50%, #1a0000 0%, #0d0000 100%)',
+      border: '#2a0000',
+      shadow: 'inset 0 2px 8px rgba(0,0,0,.9)',
+    };
+    if (lightColor === 'red') return {
+      bg: 'radial-gradient(circle at 38% 32%, #ff9090 0%, #E8002D 35%, #7a0012 100%)',
+      border: '#ff2244',
+      shadow: '0 0 24px rgba(232,0,45,1), 0 0 55px rgba(232,0,45,.7), 0 0 110px rgba(232,0,45,.35), inset 0 3px 8px rgba(255,200,200,.3)',
+    };
+    if (lightColor === 'yellow') return {
+      bg: 'radial-gradient(circle at 38% 32%, #fff0a0 0%, #FFC200 35%, #8a6800 100%)',
+      border: '#ffe566',
+      shadow: '0 0 24px rgba(255,194,0,1), 0 0 55px rgba(255,194,0,.7), 0 0 110px rgba(255,194,0,.35), inset 0 3px 8px rgba(255,240,180,.3)',
+    };
+    if (lightColor === 'green') return {
+      bg: 'radial-gradient(circle at 38% 32%, #aaffcc 0%, #00C853 35%, #004d20 100%)',
+      border: '#44ff88',
+      shadow: '0 0 24px rgba(0,200,83,1), 0 0 55px rgba(0,200,83,.7), 0 0 110px rgba(0,200,83,.35), inset 0 3px 8px rgba(180,255,200,.3)',
+    };
+    return { bg: '#111', border: '#222', shadow: 'none' };
+  };
+
+  // Background glow matches light color
+  const bgGlow = lightColor === 'red'
+    ? 'radial-gradient(ellipse at 50% 52%, rgba(180,0,20,.55) 0%, rgba(100,0,10,.25) 35%, transparent 65%)'
+    : lightColor === 'yellow'
+    ? 'radial-gradient(ellipse at 50% 52%, rgba(200,140,0,.45) 0%, rgba(120,80,0,.2) 35%, transparent 65%)'
+    : lightColor === 'green'
+    ? 'radial-gradient(ellipse at 50% 52%, rgba(0,160,60,.45) 0%, rgba(0,90,30,.2) 35%, transparent 65%)'
+    : 'radial-gradient(ellipse at 50% 52%, rgba(60,0,5,.3) 0%, transparent 55%)';
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 99999,
+      background: '#000',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden',
+      opacity: fading ? 0 : 1,
+      transition: 'opacity 0.35s ease',
+    }}>
+      {/* ── BACKGROUND: F1 neon red glowing logo photo ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        {/* Real F1 track + atmosphere */}
+        <img
+          src="https://images.unsplash.com/photo-1558618047-f4e60c9b07c5?w=1800&q=90"
+          alt=""
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center',
+            filter: `brightness(${showContent ? .14 : 0}) saturate(.5) contrast(1.2)`,
+            transition: 'filter 1s ease',
+          }}
+          onError={e => e.target.style.display = 'none'}
+        />
+        {/* Deep black vignette — like the neon logo photo */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.2) 0%, rgba(0,0,0,.75) 55%, rgba(0,0,0,.97) 100%)',
+        }} />
+        {/* Dynamic light glow from the race lights */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: bgGlow,
+          transition: 'background 0.18s ease',
+        }} />
+        {/* Scanlines — TV broadcast look */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.012) 2px, rgba(255,255,255,.012) 4px)',
+          pointerEvents: 'none',
+        }} />
+      </div>
+
+      {/* ── REAL F1 SVG LOGO — centered, glowing ── */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        transform: 'translate(-50%, -55%)',
+        zIndex: 1,
+        opacity: showContent ? 1 : 0,
+        transition: 'opacity 0.8s ease',
+        pointerEvents: 'none',
+      }}>
+        {/* Official F1 logo shape via SVG path — the exact arrow-F + 1 logo */}
+        <svg viewBox="0 0 400 160" style={{
+          width: 'clamp(280px, 38vw, 520px)',
+          filter: lightColor === 'red'
+            ? 'drop-shadow(0 0 30px rgba(232,0,45,.9)) drop-shadow(0 0 80px rgba(232,0,45,.5)) drop-shadow(0 0 160px rgba(232,0,45,.25))'
+            : lightColor === 'yellow'
+            ? 'drop-shadow(0 0 30px rgba(255,194,0,.9)) drop-shadow(0 0 80px rgba(255,194,0,.5))'
+            : lightColor === 'green'
+            ? 'drop-shadow(0 0 30px rgba(0,200,83,.9)) drop-shadow(0 0 80px rgba(0,200,83,.5))'
+            : 'drop-shadow(0 0 20px rgba(232,0,45,.4)) drop-shadow(0 0 50px rgba(232,0,45,.2))',
+          transition: 'filter 0.2s ease',
+        }}>
+          {/* F1 logo: left F-shape with arrow cutout + right 1 with speed stripes */}
+          {/* Rectangle background */}
+          <rect x="0" y="10" width="400" height="140" rx="6"
+            fill={lightColor === 'red' ? '#E8002D'
+                : lightColor === 'yellow' ? '#d4a000'
+                : lightColor === 'green' ? '#00882e'
+                : '#C8001E'}
+            opacity="0.92"
+          />
+          {/* The white F shape */}
+          <path d="M 30 30 L 30 130 L 58 130 L 58 95 L 105 95 L 105 72 L 58 72 L 58 52 L 118 52 L 118 30 Z"
+            fill="white" />
+          {/* Arrow cutout in F to make the hidden 1 */}
+          <path d="M 78 52 L 58 72 L 78 72 Z" fill={
+            lightColor === 'red' ? '#E8002D'
+            : lightColor === 'yellow' ? '#d4a000'
+            : lightColor === 'green' ? '#00882e'
+            : '#C8001E'
+          } />
+          {/* Speed lines (3 diagonal stripes) */}
+          <path d="M 135 30 L 175 30 L 175 130 L 135 130 Z" fill="white" opacity="0.0" />
+          {/* Diagonal speed stripes */}
+          <path d="M 138 30 L 158 30 L 158 130 L 138 130 Z" fill="white" opacity="0.15" />
+          <path d="M 166 30 L 186 30 L 186 130 L 166 130 Z" fill="white" opacity="0.15" />
+          <path d="M 194 30 L 214 30 L 214 130 L 194 130 Z" fill="white" opacity="0.15" />
+          {/* The 1 numeral */}
+          <path d="M 240 30 L 240 130 L 270 130 L 270 30 Z" fill="white" />
+          {/* Diagonal stroke of 1 top-left */}
+          <path d="M 215 50 L 240 30 L 240 58 L 215 78 Z" fill="white" />
+          {/* Base serif of 1 */}
+          <path d="M 210 130 L 210 115 L 300 115 L 300 130 Z" fill="white" />
+          {/* Speed stripes right side */}
+          <path d="M 318 30 L 338 30 L 268 130 L 248 130 Z" fill="white" opacity="0.18" />
+          <path d="M 345 30 L 365 30 L 295 130 L 275 130 Z" fill="white" opacity="0.18" />
+          <path d="M 372 30 L 392 30 L 322 130 L 302 130 Z" fill="white" opacity="0.18" />
+          {/* Right border */}
+          <rect x="380" y="10" width="20" height="140" rx="3"
+            fill={lightColor === 'red' ? '#E8002D' : lightColor === 'yellow' ? '#d4a000' : lightColor === 'green' ? '#00882e' : '#C8001E'}
+          />
+        </svg>
+      </div>
+
+      {/* ── CONTENT ── */}
+      <div style={{
+        position: 'relative', zIndex: 5,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center',
+        opacity: showContent ? 1 : 0,
+        transition: 'opacity 0.6s ease',
+        marginTop: '15vh',
+      }}>
+        {/* FIA + 2026 row */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 20,
+          marginBottom: 28,
+          fontFamily: 'var(--font-d)',
+        }}>
+          <div style={{ border: '1px solid rgba(255,255,255,.3)', padding: '5px 14px', fontWeight: 900, fontSize: 14, letterSpacing: 4, color: 'rgba(255,255,255,.6)' }}>FIA</div>
+          <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,.2)' }} />
+          <div style={{ fontWeight: 900, fontSize: 18, letterSpacing: 6, color: 'rgba(255,255,255,.5)' }}>2026</div>
+          <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,.2)' }} />
+          <div style={{ fontWeight: 600, fontSize: 10, letterSpacing: 4, color: 'rgba(255,255,255,.35)', lineHeight: 1.6, textAlign: 'center' }}>FORMULA ONE<br />WORLD CHAMPIONSHIP</div>
+        </div>
+
+        {/* Status text */}
+        <div style={{
+          fontFamily: 'var(--font-m)', fontSize: 11, letterSpacing: 4,
+          color: lightColor === 'green' ? '#00C853'
+               : lightColor === 'yellow' ? '#FFC200'
+               : lightColor === 'red' ? 'rgba(255,100,100,.7)'
+               : 'rgba(255,255,255,.4)',
+          minHeight: 18, textAlign: 'center', marginBottom: 32,
+          transition: 'color 0.2s ease',
+          textTransform: 'uppercase',
+        }}>
+          {statusText}
+        </div>
+
+        {/* ── THE 5 LIGHTS ── */}
+        {(phase === 'lights' || phase === 'go') && (
+          <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
+            {/* Gantry crossbar */}
+            <div style={{ position: 'absolute', width: '380px', height: 14, marginTop: -50, background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 60%, #111 100%)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.8)' }} />
+            {/* Mounting poles */}
+            {[0,1,2,3,4].map(i => (
+              <div key={i} style={{ position: 'absolute', width: 8, height: 32, marginTop: -30, marginLeft: i*74 - 148, background: '#1a1a1a', borderRadius: 2 }} />
+            ))}
+            {[1,2,3,4,5].map(n => {
+              const g = getLightGlow(n);
+              const lit = litCount >= n;
+              return (
+                <div key={n} style={{
+                  width: 64, height: 64, borderRadius: '50%',
+                  background: g.bg,
+                  border: `3px solid ${g.border}`,
+                  boxShadow: g.shadow,
+                  transition: 'all 0.08s ease',
+                  position: 'relative',
+                  flexShrink: 0,
+                }}>
+                  {lit && (
+                    <div style={{
+                      position: 'absolute', top: '18%', left: '22%',
+                      width: '28%', height: '16%',
+                      borderRadius: '50%',
+                      background: 'rgba(255,255,255,.35)',
+                      transform: 'rotate(-20deg)',
+                    }} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* GO text */}
+        {phase === 'go' && (
+          <div style={{
+            marginTop: 36, fontFamily: 'var(--font-d)', fontWeight: 900, fontStyle: 'italic',
+            fontSize: 'clamp(28px, 5vw, 44px)', letterSpacing: 8, color: '#00C853',
+            textShadow: '0 0 40px rgba(0,200,83,.9), 0 0 80px rgba(0,200,83,.4)',
+            animation: 'introStatusPulse 0.3s ease both',
+          }}>
+            LIGHTS OUT — RACE BEGINS
+          </div>
+        )}
+      </div>
+
+      {/* BOTTOM SPONSORS */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 38,
+        background: 'rgba(0,0,0,.6)', borderTop: '1px solid rgba(255,255,255,.06)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        gap: 32, fontFamily: 'var(--font-m)', fontSize: 10, letterSpacing: 3,
+        color: 'rgba(255,255,255,.2)', zIndex: 10, textTransform: 'uppercase',
+      }}>
+        {['ROLEX','ARAMCO','AWS','DHL','HEINEKEN','PIRELLI','QATAR AIRWAYS','CRYPTO.COM','LENOVO'].map(s => (
+          <span key={s}>{s}</span>
+        ))}
+      </div>
+
+      {/* TOP BAR */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 40,
+        background: 'linear-gradient(to right, rgba(200,0,20,.9), rgba(100,0,10,.9))',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 36,
+        fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 11, letterSpacing: 4,
+        color: 'rgba(255,255,255,.8)', textTransform: 'uppercase',
+        zIndex: 10, borderBottom: '1px solid rgba(255,255,255,.1)',
+        transform: showContent ? 'translateY(0)' : 'translateY(-100%)',
+        transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+      }}>
+        <span>🏁 F1 HUB 2026</span>
+        <span style={{ opacity: .35 }}>|</span>
+        <span>ROUND 3 · JAPANESE GP</span>
+        <span style={{ opacity: .35 }}>|</span>
+        <span>SUZUKA · MAR 27–29</span>
+      </div>
+
+      {/* WIPE TRANSITIONS */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 20,
+        background: lightColor === 'green' || phase === 'go' ? '#00C853' : '#E8002D',
+        transformOrigin: 'left',
+        transform: wipeRed ? 'scaleX(1)' : 'scaleX(0)',
+        transition: wipeRed ? 'transform 0.38s cubic-bezier(0.7,0,1,1)' : 'none',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 21,
+        background: '#040404',
+        transformOrigin: 'left',
+        transform: wipeDark ? 'scaleX(1)' : 'scaleX(0)',
+        transition: wipeDark ? 'transform 0.32s 0.06s cubic-bezier(0.7,0,1,1)' : 'none',
+      }} />
+    </div>
+  );
+}
+
+
+function SponsorsBar() {
+  const sponsors = [
+    { name: 'ROLEX', highlight: false },
+    { name: 'ARAMCO', highlight: false },
+    { name: 'AWS', highlight: false },
+    { name: 'DHL', highlight: false },
+    { name: 'HEINEKEN', highlight: false },
+    { name: 'PIRELLI', highlight: true },
+    { name: 'QATAR AIRWAYS', highlight: false },
+    { name: 'CRYPTO.COM', highlight: false },
+    { name: 'MSC CRUISES', highlight: false },
+    { name: 'LENOVO', highlight: false },
+    { name: 'SALESFORCE', highlight: false },
+    { name: 'MASTERCARD', highlight: false },
+  ];
+  const doubled = [...sponsors, ...sponsors];
+  return (
+    <div className="sponsors-bar" style={{ position: 'relative' }}>
+      {/* F1 logo left */}
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 100, background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, flexShrink: 0 }}>
+        <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontStyle: 'italic', fontSize: 22, color: '#fff', letterSpacing: -1 }}>F<span style={{ color: 'rgba(255,255,255,.75)' }}>1</span></span>
+      </div>
+      {/* FIA badge right */}
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'var(--surface2)', borderLeft: '1px solid var(--gray4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, flexShrink: 0 }}>
+        <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 14, letterSpacing: 2, color: 'var(--gray2)' }}>FIA</span>
+      </div>
+      <div style={{ overflow: 'hidden', width: '100%', padding: '0 100px 0 100px' }}>
+        <div className="sponsors-scroll">
+          {doubled.map((s, i) => (
+            <span key={i} className={`sponsor-item${s.highlight ? ' highlighted' : ''}`}>{s.name}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRIVERS GRID (Home Page Section)
+═══════════════════════════════════════════════════════════ */
+function DriversGridSection({ navigate }) {
+  return (
+    <section className="drivers-grid-section">
+      <div className="section-header-flex">
+        <div>
+          <div className="section-label">2026 SEASON · 22 DRIVERS</div>
+          <h2 className="section-title">THE <span>DRIVERS</span></h2>
+        </div>
+        <div className="section-desc" style={{ textAlign: 'right' }}>
+          Every driver racing in the 2026 FIA Formula One World Championship.
+        </div>
+      </div>
+      <div className="drivers-scroll-wrap">
+        {STATIC_DRIVERS.map((d) => {
+          const tc = getColor(d.teamId);
+          const photo = DRIVER_PHOTOS[d.name];
+          return (
+            <div key={d.name} className="driver-grid-card" onClick={() => navigate('team', { teamId: d.teamId })}>
+              {/* Team colour bar */}
+              <div className="dgc-team-bar" style={{ background: tc.primary }} />
+              {/* Photo */}
+              {photo ? (
+                <img className="dgc-img" src={photo} alt={d.name} onError={e => { e.target.style.display='none'; }} />
+              ) : (
+                <div className="dgc-fallback" style={{ background: tc.dark, color: `${tc.primary}80` }}>
+                  {d.name.split(' ').map((n,i) => <span key={i} style={{ display:'block' }}>{n}</span>)}
+                </div>
+              )}
+              {/* Hover overlay */}
+              <div className="dgc-overlay" style={{ background: `linear-gradient(135deg, ${tc.primary}22, transparent)` }} />
+              {/* Position watermark */}
+              <div className="dgc-pos">{String(d.pos).padStart(2,'0')}</div>
+              {/* Points badge */}
+              <div className="dgc-pts" style={{ color: tc.primary }}>{d.pts} PTS</div>
+              {/* Bottom info */}
+              <div className="dgc-bottom">
+                <div className="dgc-num" style={{ color: tc.primary }}>#{d.num} · {d.nat}</div>
+                <div className="dgc-name">{d.name.split(' ')[0]}<br />{d.name.split(' ').slice(1).join(' ')}</div>
+                <div className="dgc-team-name" style={{ color: `${tc.primary}99` }}>{d.team}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHAMPIONSHIP CALCULATOR PAGE
+═══════════════════════════════════════════════════════════ */
+// Points scoring system 2026
+const PTS_SYSTEM = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1, 0];
+const FL_BONUS = 1;
+
+function generateScenarios(driverName, currentPts, leaderPts, racesLeft) {
+  const scenarios = [];
+  const MAX_SCENARIOS = 200;
+
+  // For each finish position combo over remaining races, calculate totals
+  // We iterate: P1 wins, podiums, top5, points finishes
+  const positions = ['WIN', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'DNF'];
+  const posPoints = { WIN: 25, P2: 18, P3: 15, P4: 12, P5: 10, P6: 8, P7: 6, P8: 4, P9: 2, P10: 1, DNF: 0 };
+
+  // Enumerate win scenarios: how many wins + supporting results needed
+  for (let wins = 0; wins <= Math.min(racesLeft, 20); wins++) {
+    for (let p2s = 0; p2s <= Math.min(racesLeft - wins, 10); p2s++) {
+      for (let p3s = 0; p3s <= Math.min(racesLeft - wins - p2s, 8); p3s++) {
+        const remaining = racesLeft - wins - p2s - p3s;
+        if (remaining < 0) break;
+
+        // Best case: remaining all P4
+        const ptsFromThis = wins * 25 + p2s * 18 + p3s * 15 + remaining * 12;
+        const totalPts = currentPts + ptsFromThis;
+        const gap = leaderPts - currentPts;
+
+        if (ptsFromThis >= gap) {
+          const fl = ptsFromThis + FL_BONUS >= gap ? '+ FL' : '';
+          const desc = [
+            wins > 0 ? `${wins} Win${wins>1?'s':''}` : null,
+            p2s > 0 ? `${p2s} P2` : null,
+            p3s > 0 ? `${p3s} P3` : null,
+            remaining > 0 ? `${remaining} P4` : null,
+          ].filter(Boolean).join(' + ');
+
+          scenarios.push({
+            desc: desc || 'Maximum points every race',
+            ptsGained: ptsFromThis,
+            totalPts,
+            wins, p2s, p3s,
+            label: wins >= 5 ? 'DOMINANT' : wins >= 3 ? 'STRONG' : wins >= 1 ? 'POSSIBLE' : 'CONSISTENT',
+            color: wins >= 3 ? '#00D2BE' : wins >= 1 ? '#FF8000' : '#888',
+          });
+          if (scenarios.length >= MAX_SCENARIOS) return scenarios;
+          break; // Found one for this wins/p2/p3 combo
+        }
+      }
+      if (scenarios.length >= MAX_SCENARIOS) break;
+    }
+    if (scenarios.length >= MAX_SCENARIOS) break;
+  }
+
+  // Sort: fewest wins first, then fewest podiums
+  scenarios.sort((a, b) => a.wins - b.wins || (a.p2s + a.p3s) - (b.p2s + b.p3s));
+  return scenarios;
+}
+
+function ChampionshipCalcPage({ navigate }) {
+  const [selectedDriver, setSelectedDriver] = useState('George Russell');
+  const [targetDriver, setTargetDriver] = useState('George Russell');
+  const [customRacesLeft, setCustomRacesLeft] = useState(20);
+  const [filter, setFilter] = useState('ALL');
+  const [results, setResults] = useState(null);
+  const [running, setRunning] = useState(false);
+
+  const runCalc = () => {
+    setRunning(true);
+    setTimeout(() => {
+      const driver = STATIC_DRIVERS.find(d => d.name === selectedDriver);
+      const leader = STATIC_DRIVERS.find(d => d.name === targetDriver);
+      if (!driver || !leader) { setRunning(false); return; }
+
+      const scenarios = generateScenarios(
+        driver.name, driver.pts, leader.pts, parseInt(customRacesLeft) || 20
+      );
+
+      const maxPtsAvailable = (parseInt(customRacesLeft)||20) * (25 + FL_BONUS);
+      const gap = leader.pts - driver.pts;
+      const canWin = driver.pts + maxPtsAvailable >= leader.pts;
+
+      setResults({
+        driver, leader, scenarios, gap,
+        canWin, maxPtsAvailable,
+        racesLeft: parseInt(customRacesLeft) || 20,
+        minWins: scenarios.length > 0 ? scenarios[0].wins : null,
+        minWinsScenario: scenarios.find(s => s.wins > 0),
+      });
+      setRunning(false);
+    }, 400);
+  };
+
+  const filtered = results ? results.scenarios.filter(s => {
+    if (filter === 'ALL') return true;
+    if (filter === 'WINS') return s.wins > 0;
+    if (filter === 'NO WINS') return s.wins === 0;
+    if (filter === 'DOMINANT') return s.wins >= 4;
+    return true;
+  }) : [];
+
+  return (
+    <div className="calc-page">
+      <div className="calc-hero">
+        <div className="section-label au">CHAMPIONSHIP SCENARIOS ENGINE</div>
+        <h1 className="section-title au1">RACE <span>CALCULATOR</span></h1>
+        <div className="section-desc au2" style={{ maxWidth: 600 }}>
+          Compute every possible path to the championship. Select any driver, set the target, run all scenarios — from dominant to barely-possible.
+        </div>
+      </div>
+
+      <div className="calc-grid">
+        {/* LEFT: inputs */}
+        <div>
+          <div className="calc-panel">
+            <div className="calc-panel-title">⚙ CONFIGURE SCENARIO</div>
+
+            <div className="calc-field">
+              <div className="calc-label">Driver to analyse</div>
+              <select className="calc-input calc-select" value={selectedDriver} onChange={e => setSelectedDriver(e.target.value)}>
+                {STATIC_DRIVERS.map(d => (
+                  <option key={d.name} value={d.name}>{d.name} — {d.pts} pts ({d.team})</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="calc-field">
+              <div className="calc-label">Target to beat / match</div>
+              <select className="calc-input calc-select" value={targetDriver} onChange={e => setTargetDriver(e.target.value)}>
+                {STATIC_DRIVERS.map(d => (
+                  <option key={d.name} value={d.name}>{d.name} — {d.pts} pts</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="calc-field">
+              <div className="calc-label">Races remaining (default: 20)</div>
+              <input className="calc-input" type="number" min={1} max={22} value={customRacesLeft}
+                onChange={e => setCustomRacesLeft(e.target.value)} />
+            </div>
+
+            <button className="calc-run-btn" onClick={runCalc} disabled={running}>
+              {running ? '⏳ COMPUTING...' : '⚡ RUN ALL SCENARIOS'}
+            </button>
+          </div>
+
+          {/* Current standings reference */}
+          <div className="calc-panel" style={{ marginTop: 3 }}>
+            <div className="calc-panel-title">📊 CURRENT STANDINGS</div>
+            {STATIC_DRIVERS.slice(0,10).map(d => {
+              const tc = getColor(d.teamId);
+              const sel = d.name === selectedDriver;
+              const tgt = d.name === targetDriver && d.name !== selectedDriver;
+              return (
+                <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--gray4)', background: sel ? `${tc.primary}10` : 'transparent', padding: '8px 10px', margin: '0 -10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 16, color: 'var(--gray3)', width: 22 }}>{d.pos}</span>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: tc.primary, display: 'inline-block' }} />
+                    <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontStyle: 'italic', fontSize: 14, color: sel ? tc.primary : tgt ? '#FFD700' : 'var(--gray1)' }}>{d.name}</span>
+                    {sel && <span style={{ fontFamily: 'var(--font-m)', fontSize: 9, color: tc.primary, letterSpacing: 2 }}>TARGET</span>}
+                    {tgt && <span style={{ fontFamily: 'var(--font-m)', fontSize: 9, color: '#FFD700', letterSpacing: 2 }}>BEAT THIS</span>}
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-m)', fontSize: 12, color: tc.primary }}>{d.pts}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT: results */}
+        <div className="calc-results">
+          {running && (
+            <div className="calc-loading">
+              <div className="loading-spinner" />
+              COMPUTING ALL CHAMPIONSHIP PATHS...
+            </div>
+          )}
+          {!running && !results && (
+            <div className="calc-empty">
+              <div style={{ fontSize: 48, marginBottom: 16 }}>🏁</div>
+              SELECT A DRIVER AND CLICK<br />"RUN ALL SCENARIOS"<br />TO SEE EVERY PATH TO THE TITLE
+            </div>
+          )}
+          {!running && results && (
+            <>
+              <div className="calc-results-title">
+                📐 CHAMPIONSHIP PATHS FOR {results.driver.name.toUpperCase()}
+                {results.driver.name !== results.leader.name ? ` TO BEAT ${results.leader.name.toUpperCase()}` : ' TO DEFEND THE LEAD'}
+              </div>
+
+              {/* Summary cards */}
+              <div className="calc-summary">
+                <div className="calc-summary-card">
+                  <div className="calc-summary-val" style={{ color: results.canWin ? '#00D2BE' : '#E8002D' }}>
+                    {results.canWin ? 'YES' : 'NO'}
+                  </div>
+                  <div className="calc-summary-lbl">CAN STILL WIN?</div>
+                </div>
+                <div className="calc-summary-card">
+                  <div className="calc-summary-val" style={{ color: '#FF8000' }}>
+                    {results.gap > 0 ? results.gap : '—'}
+                  </div>
+                  <div className="calc-summary-lbl">POINTS GAP</div>
+                </div>
+                <div className="calc-summary-card">
+                  <div className="calc-summary-val" style={{ color: '#FFD700' }}>
+                    {results.scenarios.length}
+                  </div>
+                  <div className="calc-summary-lbl">VALID PATHS FOUND</div>
+                </div>
+              </div>
+
+              {results.scenarios.length === 0 ? (
+                <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--red)', fontFamily: 'var(--font-d)', fontSize: 16, letterSpacing: 4 }}>
+                  ✗ NO VALID CHAMPIONSHIP PATH EXISTS WITH {results.racesLeft} RACES REMAINING
+                </div>
+              ) : (
+                <>
+                  {/* Min wins callout */}
+                  <div style={{ background: 'rgba(232,0,45,.08)', border: '1px solid rgba(232,0,45,.2)', padding: '14px 20px', marginBottom: 16, fontFamily: 'var(--font-b)', fontSize: 13, color: 'var(--gray1)' }}>
+                    <strong style={{ color: 'var(--red)' }}>MINIMUM PATH: </strong>
+                    {results.scenarios[0].wins === 0
+                      ? `Can win WITHOUT a race win — needs consistent top-5 finishes`
+                      : `Needs at least ${results.scenarios[0].wins} win${results.scenarios[0].wins>1?'s':''} — ${results.scenarios[0].desc}`
+                    }
+                    {' '}· Max available: {results.maxPtsAvailable} pts over {results.racesLeft} races
+                  </div>
+
+                  {/* Filter tabs */}
+                  <div className="calc-filters">
+                    {['ALL', 'WINS', 'NO WINS', 'DOMINANT'].map(f => (
+                      <button key={f} className={`calc-filter-btn${filter===f?' active':''}`} onClick={() => setFilter(f)}>
+                        {f} {f==='ALL' ? `(${results.scenarios.length})` : f==='WINS' ? `(${results.scenarios.filter(s=>s.wins>0).length})` : f==='NO WINS' ? `(${results.scenarios.filter(s=>s.wins===0).length})` : `(${results.scenarios.filter(s=>s.wins>=4).length})`}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="calc-scenarios-wrap">
+                    {filtered.slice(0, 150).map((s, i) => (
+                      <div key={i} className="calc-scenario">
+                        <div className={`calc-scenario-rank ${i<3?`s${i+1}`:''}`}>{i+1}</div>
+                        <div>
+                          <span className="calc-scenario-tag" style={{ color: s.color, borderColor: `${s.color}55`, background: `${s.color}10` }}>
+                            {s.label}
+                          </span>
+                          <span className="calc-scenario-desc">{s.desc}</span>
+                        </div>
+                        <div className="calc-scenario-pts" style={{ color: s.color }}>+{s.ptsGained} pts → {s.totalPts}</div>
+                      </div>
+                    ))}
+                    {filtered.length > 150 && (
+                      <div style={{ padding: '16px', textAlign: 'center', fontFamily: 'var(--font-m)', fontSize: 11, color: 'var(--gray3)', letterSpacing: 2 }}>
+                        + {filtered.length - 150} MORE SCENARIOS NOT SHOWN
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      <Footer navigate={navigate} />
+    </div>
+  );
+}
+
 /* ─── APP ROOT ───────────────────────────────────────────── */
 export default function F1Hub() {
   const [page, setPage] = useState('home');
   const [teamId, setTeamId] = useState(null);
+  const [showIntro, setShowIntro] = useState(true);
 
   const { data: standingsData } = useSWR('/api/standings', fetcher, { refreshInterval: 300000, revalidateOnFocus: true, dedupingInterval: 60000 });
   const { data: scheduleData } = useSWR('/api/schedule', fetcher, { refreshInterval: 3600000, revalidateOnFocus: false });
@@ -1034,13 +1768,14 @@ export default function F1Hub() {
     const props = { navigate, standingsData, scheduleData };
     if (page === 'team' && teamId) return <TeamDetailPage teamId={teamId} {...props} />;
     switch (page) {
-      case 'home':      return <HomePage {...props} />;
+      case 'home':      return <><HomePage {...props} /><DriversGridSection navigate={navigate} /></>;
       case 'teams':     return <TeamsPage {...props} />;
       case 'drivers':   return <DriversPage {...props} />;
       case 'news':      return <NewsPage {...props} />;
       case 'schedule':  return <SchedulePage {...props} />;
       case 'predictor': return <PredictorPage {...props} />;
-      default:          return <HomePage {...props} />;
+      case 'calculator':return <ChampionshipCalcPage {...props} />;
+      default:          return <><HomePage {...props} /><DriversGridSection navigate={navigate} /></>;
     }
   };
 
@@ -1052,8 +1787,10 @@ export default function F1Hub() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎</text></svg>" />
       </Head>
+      {showIntro && <IntroScreen onDone={() => setShowIntro(false)} />}
       <Ticker standings={standingsData} />
       <Navbar page={page} navigate={navigate} />
+      <SponsorsBar />
       {renderPage()}
     </>
   );
