@@ -36,7 +36,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* NAVBAR */
-.nav { position: fixed; top: 28px; width: 100%; z-index: 999; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, rgba(8,8,8,.98), rgba(8,8,8,.85)); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.05); }
+.nav { position: fixed; top: 28px; width: 100%; z-index: 999; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, rgba(8,8,8,.98), rgba(8,8,8,.85)); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.05); transition: transform .25s ease, opacity .25s ease; }
+.nav.nav-hidden { transform: translateY(-120%); opacity: 0; pointer-events: none; }
 .nav-logo { font-family: var(--font-d); font-weight: 900; font-style: italic; font-size: 22px; color: var(--red); letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
 .nav-links { display: flex; gap: 36px; }
 .nav-link { font-family: var(--font-d); font-weight: 600; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: var(--gray2); cursor: pointer; transition: color .2s; position: relative; }

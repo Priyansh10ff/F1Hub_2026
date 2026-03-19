@@ -303,14 +303,14 @@ function Ticker({ standings }) {
 }
 
 /* ─── NAVBAR ─────────────────────────────────────────────── */
-function Navbar({ page, navigate }) {
+function Navbar({ page, navigate, hidden }) {
   const links = [
     { id: 'home', label: 'HOME' }, { id: 'teams', label: 'TEAMS' },
     { id: 'schedule', label: 'SCHEDULE' }, { id: 'drivers', label: 'DRIVERS' },
     { id: 'news', label: 'NEWS' }, { id: 'calculator', label: 'CALC' },
   ];
   return (
-    <nav className="nav">
+    <nav className={`nav ${hidden ? 'nav-hidden' : ''}`}>
       <div className="nav-logo" onClick={() => navigate('home')}>F1 HUB 2026</div>
       <div className="nav-links">
         {links.map(l => (
@@ -1796,9 +1796,17 @@ export default function F1Hub() {
   const [page, setPage] = useState('home');
   const [teamId, setTeamId] = useState(null);
   const [showIntro, setShowIntro] = useState(true);
+  const [isNavHidden, setIsNavHidden] = useState(false);
 
   const { data: standingsData } = useSWR('/api/standings', fetcher, { refreshInterval: 300000, revalidateOnFocus: true, dedupingInterval: 60000 });
   const { data: scheduleData } = useSWR('/api/schedule', fetcher, { refreshInterval: 3600000, revalidateOnFocus: false });
+
+  useEffect(() => {
+    const onScroll = () => setIsNavHidden(window.scrollY > 20);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navigate = useCallback((p, extra = {}) => {
     setPage(p);
@@ -1831,7 +1839,7 @@ export default function F1Hub() {
       </Head>
       {showIntro && <IntroScreen onDone={() => setShowIntro(false)} />}
       <Ticker standings={standingsData} />
-      <Navbar page={page} navigate={navigate} />
+      <Navbar page={page} navigate={navigate} hidden={isNavHidden} />
       <SponsorsBar />
       {renderPage()}
     </>
