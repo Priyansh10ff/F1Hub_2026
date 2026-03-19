@@ -26,45 +26,85 @@ const TC = {
 };
 const getColor = (id) => TC[id] || { primary: '#888', dark: '#111' };
 
-/* ─── DRIVER PHOTOS ── Official F1 CDN with built-in fallback ── */
-const DRIVER_PHOTOS = {
-  'George Russell':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mercedes/georus01/2026mercedesgeorus01right.webp',
-  'Kimi Antonelli':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mercedes/andant01/2026mercedesandant01right.webp',
-  'Lewis Hamilton':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/ferrari/lewham01/2026ferrarilewham01right.webp',
-  'Charles Leclerc':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/ferrari/chalec01/2026ferrarichalec01right.webp',
-  'Lando Norris':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mclaren/lannor01/2026mclarenlannor01right.webp',
-  'Oscar Piastri':     'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/mclaren/oscpia01/2026mclarenoscpia01right.webp',
-  'Max Verstappen':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/red-bull-racing/maxver01/2026redbullracingmaxver01right.webp',
-  'Isack Hadjar':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/red-bull-racing/isahad01/2026redbullracingisahad01right.webp',
-  'Liam Lawson':       'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/racing-bulls/lialaw01/2026racingbullslialaw01right.webp',
-  'Arvid Lindblad':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/racing-bulls/arvlin01/2026racingbullsarvlin01right.webp',
-  'Oliver Bearman':    'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/haas/olibea01/2026haasolibea01right.webp',
-  'Esteban Ocon':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/haas/estoco01/2026haasestoco01right.webp',
-  'Pierre Gasly':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/alpine/piegas01/2026alpinepiegas01right.webp',
-  'Franco Colapinto':  'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/alpine/fracol01/2026alpinefracol01right.webp',
-  'Nico Hülkenberg':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/audi/nichul01/2026audinichul01right.webp',
-  'Gabriel Bortoleto': 'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/audi/gabbor01/2026audigabbor01right.webp',
-  'Carlos Sainz':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/williams/carsai01/2026williamscarsai01right.webp',
-  'Alexander Albon':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/williams/alealb01/2026williamsalealb01right.webp',
-  'Fernando Alonso':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/aston-martin/feralo01/2026astonmartinferalo01right.webp',
-  'Lance Stroll':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/aston-martin/lanstr01/2026astonmartinlanstr01right.webp',
-  'Valtteri Bottas':   'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/cadillac/valbot01/2026cadillacvalbot01right.webp',
-  'Sergio Pérez':      'https://media.formula1.com/image/upload/c_fill,w_720,h_900/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/cadillac/serper01/2026cadillacserper01right.webp',
+const DRIVER_IMG_FALLBACK = 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=900&q=80&fit=crop';
+const CAR_IMG_FALLBACK = 'https://images.unsplash.com/photo-1611821064430-0d40291d0f0b?w=1400&q=80&fit=crop';
+const applyFallbackImage = (e, fallbackUrl) => {
+  const img = e.currentTarget;
+  if (img.dataset.fallbackApplied === '1') {
+    img.style.display = 'none';
+    return;
+  }
+  img.dataset.fallbackApplied = '1';
+  img.src = fallbackUrl;
 };
 
+/* ─── DRIVER PHOTOS ── Official F1 CDN with built-in fallback ── */
+const DRIVER_PHOTOS = {
+  'George Russell': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/mercedes/georus01/2026mercedesgeorus01right.webp',
+
+'Kimi Antonelli': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/v1740000001/common/f1/2026/mercedes/andant01/2026mercedesandant01right.webp',  'Lewis Hamilton': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/ferrari/lewham01/2026ferrarilewham01right.webp',
+
+  'Charles Leclerc': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/ferrari/chalec01/2026ferrarichalec01right.webp',
+
+  'Lando Norris': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/mclaren/lannor01/2026mclarenlannor01right.webp',
+
+  'Oscar Piastri': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/mclaren/oscpia01/2026mclarenoscpia01right.webp',
+
+  'Max Verstappen': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/redbullracing/maxver01/2026redbullracingmaxver01right.webp',
+
+  'Isack Hadjar': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/racingbulls/isahad01/2026racingbullsisahad01right.webp',
+
+  'Liam Lawson': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/redbullracing/lialaw01/2026redbullracinglialaw01right.webp',
+
+  'Arvid Lindblad': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/racingbulls/arvlin01/2026racingbullsarvlin01right.webp',
+
+  'Oliver Bearman': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/haas/olibea01/2026haasolibea01right.webp',
+
+  'Esteban Ocon': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/haas/estoco01/2026haasestoco01right.webp',
+
+  'Pierre Gasly': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/alpine/piegas01/2026alpinepiegas01right.webp',
+
+  'Franco Colapinto': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/alpine/fracol01/2026alpinefracol01right.webp',
+
+  'Nico Hülkenberg': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/audi/nichul01/2026audinichul01right.webp',
+
+  'Gabriel Bortoleto': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/audi/gabbor01/2026audigabbor01right.webp',
+
+  'Carlos Sainz': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/williams/carsai01/2026williamscarsai01right.webp',
+
+  'Alexander Albon': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/williams/alealb01/2026williamsalealb01right.webp',
+
+  'Fernando Alonso': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/astonmartin/feralo01/2026astonmartinferalo01right.webp',
+
+  'Lance Stroll': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/astonmartin/lanstr01/2026astonmartinlanstr01right.webp',
+
+  'Valtteri Bottas': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/cadillac/valbot01/2026cadillacvalbot01right.webp',
+
+  'Sergio Pérez': 'https://media.formula1.com/image/upload/c_fill,w_720/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/common/f1/2026/cadillac/serper01/2026cadillacserper01right.webp'
+};
 /* ─── 2026 CAR IMAGES ── Official F1 CDN with fallback ── */
 const CAR_IMAGES = {
-  mercedes:    'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/mercedes.png',
-  ferrari:     'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/ferrari.png',
-  mclaren:     'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/mclaren.png',
-  redbull:     'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/red-bull-racing.png',
-  racingbulls: 'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/rb.png',
-  haas:        'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/haas.png',
-  alpine:      'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/alpine.png',
-  audi:        'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/audi.png',
-  williams:    'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/williams.png',
-  cadillac:    'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/cadillac.png',
-  astonmartin: 'https://media.formula1.com/image/upload/c_limit,w_1320/q_auto/d_team_car_fallback_image.png/v1740000000/content/dam/fom-website/teams/2026/aston-martin.png',
+  mercedes:    'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/mercedes/2026mercedescarright.webp',
+
+  ferrari:     'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/ferrari/2026ferraricarright.webp',
+
+  mclaren:     'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/mclaren/2026mclarencarright.webp',
+
+  redbull:     'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/redbullracing/2026redbullracingcarright.webp',
+
+  racingbulls: 'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/racingbulls/2026racingbullscarright.webp',
+
+  haas:        'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/haas/2026haascarright.webp',
+
+  alpine:      'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/alpine/2026alpinecarright.webp',
+
+  audi:        'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/audi/2026audicarright.webp',
+
+  williams:    'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/williams/2026williamscarright.webp',
+
+  cadillac:    'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/cadillac/2026cadillaccarright.webp',
+
+  astonmartin: 'https://media.formula1.com/image/upload/c_lfill,w_512/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/common/f1/2026/astonmartin/2026astonmartincarright.webp',
 };
 
 /* ─── REAL 2026 STANDINGS (after Round 2 — Chinese GP, Mar 15 2026) ── */
@@ -354,7 +394,7 @@ function HomePage({ navigate, standingsData, scheduleData }) {
               const photo = DRIVER_PHOTOS[d.name];
               return (
                 <div key={d.name} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                  {photo && <img src={photo} alt={d.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', filter: 'brightness(.55) saturate(.7)' }} onError={e => e.target.style.display='none'} />}
+                  {photo && <img src={photo} alt={d.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 18%', filter: 'brightness(.55) saturate(.7)' }} onError={e => applyFallbackImage(e, DRIVER_IMG_FALLBACK)} />}
                   {/* team colour sliver at bottom */}
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: tc.primary }} />
                 </div>
@@ -627,7 +667,7 @@ function TeamDetailPage({ teamId, navigate, standingsData }) {
         <div className="driver-portrait" style={{ background: tc.dark, position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to top, ${tc.dark} 0%, transparent 40%)`, zIndex: 2 }} />
           {photoUrl ? (
-            <img src={photoUrl} alt={dName} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', filter: 'brightness(.88) saturate(.95)' }} onError={e => { e.target.style.display='none'; }} />
+            <img src={photoUrl} alt={dName} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 16%', filter: 'brightness(.88) saturate(.95)' }} onError={e => applyFallbackImage(e, DRIVER_IMG_FALLBACK)} />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontFamily: 'var(--font-d)', fontWeight: 900, fontStyle: 'italic', fontSize: 48, color: `${tc.primary}50`, textAlign: 'center', textTransform: 'uppercase', letterSpacing: -2 }}>
               {dName.split(' ').map((n, i) => <span key={i}>{n}<br /></span>)}
@@ -660,7 +700,7 @@ function TeamDetailPage({ teamId, navigate, standingsData }) {
             src={CAR_IMAGES[team.id]}
             alt={`${team.short} 2026`}
             style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center bottom', filter: `drop-shadow(0 0 50px ${tc.primary}35) brightness(1.05) saturate(1.15)` }}
-            onError={e => { e.target.style.display='none'; }}
+            onError={e => applyFallbackImage(e, CAR_IMG_FALLBACK)}
           />
           <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translateX(-50%)', zIndex: 0, fontFamily: 'var(--font-d)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(50px,9vw,130px)', color: `${tc.primary}07`, letterSpacing: -4, textTransform: 'uppercase', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
             {team.chassis}
@@ -1455,7 +1495,7 @@ function DriversGridSection({ navigate }) {
               <div className="dgc-team-bar" style={{ background: tc.primary }} />
               {/* Photo */}
               {photo ? (
-                <img className="dgc-img" src={photo} alt={d.name} onError={e => { e.target.style.display='none'; }} />
+                <img className="dgc-img" src={photo} alt={d.name} onError={e => applyFallbackImage(e, DRIVER_IMG_FALLBACK)} />
               ) : (
                 <div className="dgc-fallback" style={{ background: tc.dark, color: `${tc.primary}80` }}>
                   {d.name.split(' ').map((n,i) => <span key={i} style={{ display:'block' }}>{n}</span>)}
