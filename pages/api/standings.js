@@ -62,14 +62,16 @@ async function fetchErgast(url) {
   return res.json();
 }
 
+const JOLPICA_BASE = 'https://api.jolpi.ca/ergast/f1';
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300');
 
   try {
     const [driverData, constructorData, lastRaceData] = await Promise.all([
-      fetchErgast('https://ergast.com/api/f1/current/driverStandings.json'),
-      fetchErgast('https://ergast.com/api/f1/current/constructorStandings.json'),
-      fetchErgast('https://ergast.com/api/f1/current/last/results.json'),
+      fetchErgast(`${JOLPICA_BASE}/current/driverStandings.json`),
+      fetchErgast(`${JOLPICA_BASE}/current/constructorStandings.json`),
+      fetchErgast(`${JOLPICA_BASE}/current/last/results.json`),
     ]);
 
     const driverStandings = driverData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings;
@@ -131,7 +133,7 @@ export default async function handler(req, res) {
     }
 
     res.status(200).json({
-      source: 'ergast',
+      source: 'jolpica',
       lastUpdated: new Date().toISOString(),
       drivers,
       constructors,

@@ -4,14 +4,14 @@
 const STATIC_CALENDAR = [
   { rnd: 1,  name: 'Australian GP',  circuit: 'Albert Park',           country: 'Australia',     flag: '🇦🇺', dates: 'Mar 14–16',  status: 'done',    winner: 'George Russell' },
   { rnd: 2,  name: 'Chinese GP',     circuit: 'Shanghai Intl Circuit', country: 'China',         flag: '🇨🇳', dates: 'Mar 21–23',  status: 'done',    winner: 'Kimi Antonelli' },
-  { rnd: 3,  name: 'Japanese GP',    circuit: 'Suzuka Circuit',        country: 'Japan',         flag: '🇯🇵', dates: 'Mar 27–29',  status: 'next',    winner: null },
+  { rnd: 3,  name: 'Japanese GP',    circuit: 'Suzuka Circuit',        country: 'Japan',         flag: '🇯🇵', dates: 'Mar 27–29',  status: 'done',    winner: null },
   { rnd: 4,  name: 'Bahrain GP',     circuit: 'Bahrain Intl Circuit',  country: 'Bahrain',       flag: '🇧🇭', dates: 'Apr 4–6',    status: 'cancelled', winner: null },
   { rnd: 5,  name: 'Saudi Arabian GP',circuit: 'Jeddah Corniche',     country: 'Saudi Arabia',  flag: '🇸🇦', dates: 'Apr 11–13',  status: 'cancelled', winner: null },
-  { rnd: 6,  name: 'Miami GP',       circuit: 'Miami International',   country: 'USA',           flag: '🇺🇸', dates: 'May 2–4',    status: 'upcoming', winner: null },
-  { rnd: 7,  name: 'Emilia Romagna GP',circuit: 'Autodromo Enzo Ferrari',country: 'Italy',      flag: '🇮🇹', dates: 'May 16–18',  status: 'upcoming', winner: null },
-  { rnd: 8,  name: 'Monaco GP',      circuit: 'Circuit de Monaco',     country: 'Monaco',        flag: '🇲🇨', dates: 'May 23–25',  status: 'upcoming', winner: null },
-  { rnd: 9,  name: 'Spanish GP',     circuit: 'Circuit de Catalunya',  country: 'Spain',         flag: '🇪🇸', dates: 'May 30–Jun 1',status: 'upcoming', winner: null },
-  { rnd: 10, name: 'Canadian GP',    circuit: 'Circuit Gilles Villeneuve',country: 'Canada',     flag: '🇨🇦', dates: 'Jun 13–15',  status: 'upcoming', winner: null },
+  { rnd: 6,  name: 'Miami GP',       circuit: 'Miami International',   country: 'USA',           flag: '🇺🇸', dates: 'May 2–4',    status: 'done',    winner: null },
+  { rnd: 7,  name: 'Emilia Romagna GP',circuit: 'Autodromo Enzo Ferrari',country: 'Italy',      flag: '🇮🇹', dates: 'May 16–18',  status: 'done',    winner: null },
+  { rnd: 8,  name: 'Monaco GP',      circuit: 'Circuit de Monaco',     country: 'Monaco',        flag: '🇲🇨', dates: 'May 23–25',  status: 'done',    winner: null },
+  { rnd: 9,  name: 'Spanish GP',     circuit: 'Circuit de Catalunya',  country: 'Spain',         flag: '🇪🇸', dates: 'May 30–Jun 1',status: 'done',   winner: null },
+  { rnd: 10, name: 'Canadian GP',    circuit: 'Circuit Gilles Villeneuve',country: 'Canada',     flag: '🇨🇦', dates: 'Jun 13–15',  status: 'next',    winner: null },
   { rnd: 11, name: 'Austrian GP',    circuit: 'Red Bull Ring',         country: 'Austria',       flag: '🇦🇹', dates: 'Jun 27–29',  status: 'upcoming', winner: null },
   { rnd: 12, name: 'British GP',     circuit: 'Silverstone Circuit',   country: 'UK',            flag: '🇬🇧', dates: 'Jul 4–6',    status: 'upcoming', winner: null },
   { rnd: 13, name: 'Belgian GP',     circuit: 'Circuit de Spa-Francorchamps', country: 'Belgium',flag: '🇧🇪', dates: 'Jul 25–27',  status: 'upcoming', winner: null },
@@ -76,8 +76,8 @@ export default async function handler(req, res) {
 
   try {
     const [scheduleRes, resultsRes] = await Promise.all([
-      fetch('https://ergast.com/api/f1/current.json', { signal: AbortSignal.timeout(8000) }),
-      fetch('https://ergast.com/api/f1/current/results.json?limit=100', { signal: AbortSignal.timeout(8000) }),
+      fetch('https://api.jolpi.ca/ergast/f1/current.json', { signal: AbortSignal.timeout(8000) }),
+      fetch('https://api.jolpi.ca/ergast/f1/current/results.json?limit=100', { signal: AbortSignal.timeout(8000) }),
     ]);
 
     if (!scheduleRes.ok) throw new Error(`Schedule fetch failed: ${scheduleRes.status}`);
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
     const calendar = parseErgastSchedule(races, results);
 
     res.status(200).json({
-      source: 'ergast',
+      source: 'jolpica',
       lastUpdated: new Date().toISOString(),
       calendar,
       season: scheduleData?.MRData?.RaceTable?.season || '2026',
@@ -103,10 +103,31 @@ export default async function handler(req, res) {
   } catch (err) {
     console.warn('Ergast schedule failed, using static:', err.message);
 
+    // Static fallback: compute statuses dynamically so this never goes stale
+    const today = new Date();
+    let foundNext = false;
+    const dynamicCalendar = STATIC_CALENDAR.map(race => {
+      if (race.status === 'cancelled') return race;
+      // Parse race end date (second date in range, or single date)
+      const dateStr = race.dates.replace(/\u2013/g, '-'); // en-dash to hyphen
+      const [, endPart] = dateStr.split('-');
+      const parts = endPart ? endPart.trim().split(' ') : dateStr.trim().split(' ');
+      const year = new Date().getFullYear();
+      const raceEnd = new Date(`${parts.join(' ')} ${year}`);
+      
+      if (race.winner || raceEnd < today) {
+        return { ...race, status: 'done' };
+      } else if (!foundNext) {
+        foundNext = true;
+        return { ...race, status: 'next' };
+      }
+      return { ...race, status: 'upcoming' };
+    });
+
     res.status(200).json({
       source: 'static',
       lastUpdated: new Date().toISOString(),
-      calendar: STATIC_CALENDAR,
+      calendar: dynamicCalendar,
       season: '2026',
       totalRounds: STATIC_CALENDAR.length,
     });
